@@ -3,10 +3,10 @@
  * 3D 씬 설정 및 의상 모델 렌더링
  */
 
-// Three.js 및 로더를 ES Module로 import
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.150.0/build/three.module.js';
-import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.150.0/examples/jsm/loaders/GLTFLoader.js';
-import { OBJLoader } from 'https://cdn.jsdelivr.net/npm/three@0.150.0/examples/jsm/loaders/OBJLoader.js';
+// Three.js 및 로더를 ES Module로 import (import map 사용)
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 
 export class ThreeRenderer {
     constructor(canvas) {
