@@ -163,7 +163,13 @@ export class ThreeRenderer {
                         scale: scale
                     });
 
+                    // OBJ 모델을 body로 이름 지정
+                    this.clothingModel.name = 'body';
+
                     this.scene.add(this.clothingModel);
+
+                    // OBJ 모델에는 파트 이름이 없으므로 동적으로 소매 추가
+                    this.addDynamicSleevesToModel();
 
                     console.log('✅ OBJ 의상 모델 로드 완료:', modelPath);
                     console.log('📦 모델 정보:', {
@@ -487,6 +493,49 @@ export class ThreeRenderer {
         } else {
             console.error('❌ 렌더링 실패: renderer, scene, camera 중 하나가 없음');
         }
+    }
+
+    /**
+     * OBJ 모델에 동적 소매 추가
+     * OBJ 파일은 파트 이름이 없으므로 팔 움직임을 추적할 수 있는 소매를 추가
+     */
+    addDynamicSleevesToModel() {
+        if (!this.clothingModel) return;
+
+        const sleeveMaterial = new THREE.MeshPhongMaterial({
+            color: 0x4a90e2,
+            transparent: true,
+            opacity: 0.7,
+            side: THREE.DoubleSide
+        });
+
+        // 왼쪽 소매 (상완: 어깨~팔꿈치)
+        const leftSleeveGeometry = new THREE.CylinderGeometry(0.08, 0.07, 0.3, 12);
+        const leftSleeve = new THREE.Mesh(leftSleeveGeometry, sleeveMaterial);
+        leftSleeve.name = 'leftSleeve';
+        leftSleeve.position.set(-0.3, 0, 0); // 초기 위치
+        this.clothingModel.add(leftSleeve);
+
+        // 오른쪽 소매 (상완: 어깨~팔꿈치)
+        const rightSleeve = new THREE.Mesh(leftSleeveGeometry.clone(), sleeveMaterial.clone());
+        rightSleeve.name = 'rightSleeve';
+        rightSleeve.position.set(0.3, 0, 0);
+        this.clothingModel.add(rightSleeve);
+
+        // 왼쪽 하완 (팔꿈치~손목)
+        const forearmGeometry = new THREE.CylinderGeometry(0.06, 0.05, 0.25, 12);
+        const leftForearm = new THREE.Mesh(forearmGeometry, sleeveMaterial.clone());
+        leftForearm.name = 'leftForearm';
+        leftForearm.position.set(-0.45, -0.2, 0);
+        this.clothingModel.add(leftForearm);
+
+        // 오른쪽 하완
+        const rightForearm = new THREE.Mesh(forearmGeometry.clone(), sleeveMaterial.clone());
+        rightForearm.name = 'rightForearm';
+        rightForearm.position.set(0.45, -0.2, 0);
+        this.clothingModel.add(rightForearm);
+
+        console.log('👕 동적 소매 추가 완료 (왼쪽/오른쪽 상완 + 하완)');
     }
 
     /**

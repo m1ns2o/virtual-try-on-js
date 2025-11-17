@@ -219,32 +219,36 @@ export class ClothingRigger {
     updateSleeve(clothingModel, sleeveName, shoulder, elbow, canvasWidth, canvasHeight, side) {
         const sleeve = clothingModel.getObjectByName(sleeveName);
         if (!sleeve || shoulder.visibility < 0.5 || elbow.visibility < 0.5) {
+            if (!sleeve && this.loggedMissingSleeve !== sleeveName) {
+                console.warn(`⚠️ 소매 파트를 찾을 수 없음: ${sleeveName}`);
+                this.loggedMissingSleeve = sleeveName;
+            }
             return;
         }
 
-        // 소매 중점 위치 계산 (정규화된 좌표)
-        const sleeveCenter = {
-            x: (shoulder.x + elbow.x) / 2,
-            y: (shoulder.y + elbow.y) / 2,
-            z: (shoulder.z + elbow.z) / 2
-        };
+        // 어깨 중심 계산 (clothingModel의 위치)
+        const shoulderCenter = clothingModel.position;
 
-        // 어깨 위치 변환
+        // 어깨 위치 변환 (world space)
         const shoulderX = (shoulder.x - 0.5) * 2;
         const shoulderY = -(shoulder.y - 0.5) * 2;
+        const shoulderZ = -shoulder.z * 2;
 
         // 팔꿈치 위치 변환
         const elbowX = (elbow.x - 0.5) * 2;
         const elbowY = -(elbow.y - 0.5) * 2;
+        const elbowZ = -elbow.z * 2;
 
-        // 중점 계산
+        // 소매 중점 계산 (world space)
         const centerX = (shoulderX + elbowX) / 2;
         const centerY = (shoulderY + elbowY) / 2;
+        const centerZ = (shoulderZ + elbowZ) / 2;
 
+        // clothingModel의 로컬 좌표계로 변환
         sleeve.position.set(
-            centerX,
-            centerY,
-            -shoulder.z * 2
+            centerX - shoulderCenter.x,
+            centerY - shoulderCenter.y,
+            centerZ - shoulderCenter.z
         );
 
         // 회전 계산 (팔의 각도) - 변환된 좌표 사용
@@ -259,9 +263,22 @@ export class ClothingRigger {
         // 길이에 따른 스케일 조정
         const armLength = distance(shoulder, elbow);
         const baseArmLength = this.baseShoulderDistance || 0.2;
-        const scaleY = (armLength / baseArmLength) * 2; // 스케일 증가
+        const scaleY = (armLength / baseArmLength) * 2.5; // 스케일 증가
 
         sleeve.scale.set(1, scaleY, 1);
+
+        // 디버깅: 처음 몇 프레임만 로그
+        if (!this.sleeveUpdateCount) this.sleeveUpdateCount = 0;
+        this.sleeveUpdateCount++;
+
+        if (this.sleeveUpdateCount <= 2) {
+            console.log(`👕 ${sleeveName} 업데이트:`, {
+                position: sleeve.position,
+                rotation: sleeve.rotation.z * (180 / Math.PI),
+                scale: scaleY.toFixed(2),
+                armLength: armLength.toFixed(3)
+            });
+        }
     }
 
     /**
@@ -295,5 +312,7 @@ export class ClothingRigger {
     reset() {
         this.previousLandmarks = null;
         this.baseShoulderDistance = null;
+        this.sleeveUpdateCount = 0;
+        this.loggedMissingSleeve = null;
     }
 }
