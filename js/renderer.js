@@ -17,6 +17,8 @@ export class ThreeRenderer {
         this.clothingModel = null;
         this.videoTexture = null;
         this.videoPlane = null;
+        this.debugCube = null;
+        this.renderCount = 0;
     }
 
     /**
@@ -57,6 +59,17 @@ export class ThreeRenderer {
         this.scene.add(directionalLight);
 
         console.log('✅ Three.js 초기화 완료');
+        console.log('📐 캔버스 크기:', {
+            width,
+            height,
+            canvasWidth: this.canvas.width,
+            canvasHeight: this.canvas.height,
+            aspect
+        });
+        console.log('📷 카메라 위치:', this.camera.position);
+
+        // 디버그: 간단한 테스트 큐브 추가 (렌더링 확인용)
+        this.addDebugCube();
     }
 
     /**
@@ -153,6 +166,13 @@ export class ThreeRenderer {
                     this.scene.add(this.clothingModel);
 
                     console.log('✅ OBJ 의상 모델 로드 완료:', modelPath);
+                    console.log('📦 모델 정보:', {
+                        childrenCount: this.clothingModel.children.length,
+                        position: this.clothingModel.position,
+                        scale: this.clothingModel.scale,
+                        visible: this.clothingModel.visible,
+                        inScene: this.scene.children.includes(this.clothingModel)
+                    });
                     resolve();
                 },
                 (progress) => {
@@ -265,6 +285,13 @@ export class ThreeRenderer {
         this.scene.add(this.clothingModel);
 
         console.log('✅ 진짜 3D 티셔츠 모델 생성 완료 (Geometry 기반, 정면 향함)');
+        console.log('📦 모델 정보:', {
+            childrenCount: this.clothingModel.children.length,
+            position: this.clothingModel.position,
+            rotation: this.clothingModel.rotation,
+            visible: this.clothingModel.visible,
+            inScene: this.scene.children.includes(this.clothingModel)
+        });
     }
 
     /**
@@ -369,6 +396,12 @@ export class ThreeRenderer {
         this.scene.add(this.clothingModel);
 
         console.log('✅ 3D 큐브 기반 의상 모델 생성 완료 (향상된 버전)');
+        console.log('📦 모델 정보:', {
+            childrenCount: this.clothingModel.children.length,
+            position: this.clothingModel.position,
+            visible: this.clothingModel.visible,
+            inScene: this.scene.children.includes(this.clothingModel)
+        });
     }
 
     /**
@@ -437,6 +470,51 @@ export class ThreeRenderer {
     render() {
         if (this.renderer && this.scene && this.camera) {
             this.renderer.render(this.scene, this.camera);
+
+            // 디버그: 처음 몇 프레임만 로그 출력
+            if (!this.renderCount) {
+                this.renderCount = 0;
+            }
+            this.renderCount++;
+
+            if (this.renderCount <= 3) {
+                console.log(`🎬 렌더링 #${this.renderCount}:`, {
+                    sceneChildren: this.scene.children.length,
+                    canvasSize: `${this.canvas.width}x${this.canvas.height}`,
+                    hasClothingModel: !!this.clothingModel
+                });
+            }
+        } else {
+            console.error('❌ 렌더링 실패: renderer, scene, camera 중 하나가 없음');
+        }
+    }
+
+    /**
+     * 디버그: 테스트 큐브 추가 (렌더링 확인용)
+     */
+    addDebugCube() {
+        const geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+        const material = new THREE.MeshPhongMaterial({
+            color: 0xff0000,
+            transparent: true,
+            opacity: 0.8
+        });
+        this.debugCube = new THREE.Mesh(geometry, material);
+        this.debugCube.position.set(0.5, 0.5, 0);
+        this.scene.add(this.debugCube);
+        console.log('🔴 디버그 큐브 추가됨 (빨간색, 우측 상단)');
+    }
+
+    /**
+     * 디버그 큐브 제거
+     */
+    removeDebugCube() {
+        if (this.debugCube) {
+            this.scene.remove(this.debugCube);
+            this.debugCube.geometry.dispose();
+            this.debugCube.material.dispose();
+            this.debugCube = null;
+            console.log('🔴 디버그 큐브 제거됨');
         }
     }
 

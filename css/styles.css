@@ -42,12 +42,9 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: auto;
-    height: auto;
-    max-width: 90vw;
-    max-height: 90vh;
     pointer-events: none;
     z-index: 5;
+    border: 2px solid rgba(0, 255, 0, 0.3); /* 디버그용 - 캔버스 경계 표시 */
 }
 
 #debug-canvas {
@@ -55,10 +52,6 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: auto;
-    height: auto;
-    max-width: 90vw;
-    max-height: 90vh;
     pointer-events: none;
     display: none;
     z-index: 10;
