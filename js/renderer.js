@@ -3,6 +3,11 @@
  * 3D 씬 설정 및 의상 모델 렌더링
  */
 
+// Three.js 및 로더를 ES Module로 import
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.150.0/build/three.module.js';
+import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.150.0/examples/jsm/loaders/GLTFLoader.js';
+import { OBJLoader } from 'https://cdn.jsdelivr.net/npm/three@0.150.0/examples/jsm/loaders/OBJLoader.js';
+
 export class ThreeRenderer {
     constructor(canvas) {
         this.canvas = canvas;
@@ -71,7 +76,7 @@ export class ThreeRenderer {
      */
     async loadClothingModel(modelPath) {
         return new Promise((resolve, reject) => {
-            const loader = new THREE.GLTFLoader();
+            const loader = new GLTFLoader();
 
             loader.load(
                 modelPath,
@@ -103,7 +108,7 @@ export class ThreeRenderer {
      */
     async loadOBJModel(modelPath) {
         return new Promise((resolve, reject) => {
-            const loader = new THREE.OBJLoader();
+            const loader = new OBJLoader();
 
             loader.load(
                 modelPath,
